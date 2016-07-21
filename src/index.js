@@ -10,9 +10,9 @@ export default class stcAdapter {
 
     let data = {};
 
-    data['if'] = `${ld}if isset($smarty.server.HTTP_USER_AGENT) && strpos($smarty.server.HTTP_USER_AGENT, "MSIE ") === false && !isset($smarty.cookies.${nlsCookie})${rd}`;
-    data['else'] = `${ld}else${rd}`;
-    data['end'] = `${ld}/if${rd}`;
+    data['if'] = `${ld} if(isset($_SERVER["HTTP_USER_AGENT"]) && strpos($_SERVER["HTTP_USER_AGENT"], "MSIE ") === false && !isset($_COOKIE["${nlsCookie}"])) { ${rd}`;
+    data['else'] = `${ld} } else { ${rd}`;
+    data['end'] = `${ld} } ${rd}`;
 
     return data;
   }
@@ -22,7 +22,7 @@ export default class stcAdapter {
     
     let configStr = JSON.stringify(appConfig);
 
-    return `${ld}$stc_ls_config=json_decode("${configStr}", true)${rd}`;
+    return `${ld} $stc_ls_config = json_decode(\'${configStr}\', true); ${rd}`;
   }
 
   getLsBaseCode() {
@@ -31,8 +31,8 @@ export default class stcAdapter {
 
     let data = {};
 
-    data['if'] = `${ld}if !isset($${name})${rd}${ld}$${name}=true${rd}`;
-    data['end'] = `${ld}/if${rd}`;
+    data['if'] = `${ld} if(!isset($${name})) { $${name} = true; ${rd}`;
+    data['end'] = `${ld} } ${rd}`;
 
     return data;
   }
@@ -41,22 +41,18 @@ export default class stcAdapter {
     let { ld, rd } = this.config.tpl;
     let lsCookie = this.options.lsCookie;
 
-    let content = [
-      `${ld}if isset($smarty.cookies.${lsCookie}) ${rd}`, 
-      `${ld}$stc_ls_cookie=$smarty.cookies.${lsCookie}${rd}`, 
-      `${ld}else${rd}`, 
-      `${ld}$stc_ls_cookie=""${rd}`, 
-      `${ld}/if${rd}`, 
-      `${ld}$stc_cookie_length=strlen($stc_ls_cookie)${rd}`, 
-      `${ld}$stc_ls_cookies=[]${rd}`, 
-      `${ld}$index=0${rd}`, 
-      `${ld}while $index < $stc_cookie_length${rd}`, 
-      `${ld}$stc_ls_cookies[$stc_ls_cookie[$index]]=$stc_ls_cookie[$index+1]${rd}`, 
-      `${ld}$index=$index+2${rd}`, 
-      `${ld}/while${rd}`,
-    ];
-
-    return content.join('');
+    return `${ld}
+      if(isset($_COOKIE["${lsCookie}"])) {
+        $stc_ls_cookie = $_COOKIE["${lsCookie}"];
+      } else {
+        $stc_ls_cookie = "";
+      }
+      $stc_cookie_length = strlen($stc_ls_cookie);
+      $stc_ls_cookies = array();
+      for($i = 0; $i < $stc_cookie_length;$i += 2) {
+        $stc_ls_cookies[$stc_ls_cookie[$i]] = $stc_ls_cookie[$i+1];
+      }
+      ${rd}`;
   }
 
   getLsConditionCode(lsValue) {
@@ -64,11 +60,11 @@ export default class stcAdapter {
 
     let data = {};
 
-    data['if'] = `${ld}if isset($stc_ls_config["${lsValue}"]) && isset($stc_ls_cookies[$stc_ls_config["${lsValue}"]["key"]]) && $stc_ls_config["${lsValue}"]["version"] === $stc_ls_cookies[$stc_ls_config["${lsValue}"]["key"]]${rd}`;
-    data['else'] = `${ld}else${rd}`;
-    data['end'] = `${ld}/if${rd}`;
-    data['key'] = `${ld}$stc_ls_config["${lsValue}"]["key"]${rd}`;
-    data['version'] = `${ld}$stc_ls_config["${lsValue}"]["version"]${rd}`;
+    data['if'] = `${ld} if(isset($stc_ls_config["${lsValue}"]) && isset($stc_ls_cookies[$stc_ls_config["${lsValue}"]["key"]]) && $stc_ls_config["${lsValue}"]["version"] === $stc_ls_cookies[$stc_ls_config["${lsValue}"]["key"]]) { ${rd}`;
+    data['else'] = `${ld} } else { ${rd}`;
+    data['end'] = `${ld} } ${rd}`;
+    data['key'] = `${ld} echo $stc_ls_config["${lsValue}"]["key"]; ${rd}`;
+    data['version'] = `${ld} echo $stc_ls_config["${lsValue}"]["version"]; ${rd}`;
 
     return data;
   }
