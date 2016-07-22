@@ -41,18 +41,22 @@ export default class stcAdapter {
     let { ld, rd } = this.config.tpl;
     let lsCookie = this.options.lsCookie;
 
-    return `${ld}
-      if(isset($_COOKIE["${lsCookie}"])) {
-        $stc_ls_cookie = $_COOKIE["${lsCookie}"];
-      } else {
-        $stc_ls_cookie = "";
-      }
-      $stc_cookie_length = strlen($stc_ls_cookie);
-      $stc_ls_cookies = array();
-      for($i = 0; $i < $stc_cookie_length;$i += 2) {
-        $stc_ls_cookies[$stc_ls_cookie[$i]] = $stc_ls_cookie[$i+1];
-      }
-      ${rd}`;
+    let content = [
+      ld,
+      `if(isset($_COOKIE["${lsCookie}"])) {`,
+      `$stc_ls_cookie = $_COOKIE["${lsCookie}"];`,
+      `} else {`,
+      `$stc_ls_cookie = "";`,
+      `}`,
+      `$stc_cookie_length = strlen($stc_ls_cookie,`,
+      `$stc_ls_cookies = array(,`,
+      `for($i = 0; $i < $stc_cookie_length;$i += 2) {`,
+      `$stc_ls_cookies[$stc_ls_cookie[$i]] = $stc_ls_cookie[$i+1];`,
+      `}`,
+      rd,
+    ];
+
+    return content.join('');
   }
 
   getLsConditionCode(lsValue) {
