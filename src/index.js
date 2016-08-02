@@ -1,48 +1,56 @@
 export default class stcAdapter {
   constructor(options, config) {
+    this.blockStart = options.blockStart || config.tpl.ld[0];
+    this.blockEnd = options.blockStart || config.tpl.rd[0];
+
+    console.log(this);
+
     this.options = options;
     this.config = config;
   }
 
   getLsSupportCode() {
-    let { ld, rd } = this.config.tpl;
+    let { blockStart, blockEnd } = this;
+
     let nlsCookie = this.options.nlsCookie;
 
     let data = {};
 
-    data['if'] = `${ld} if(isset($_SERVER["HTTP_USER_AGENT"]) && strpos($_SERVER["HTTP_USER_AGENT"], "MSIE ") === false && !isset($_COOKIE["${nlsCookie}"])) { ${rd}`;
-    data['else'] = `${ld} } else { ${rd}`;
-    data['end'] = `${ld} } ${rd}`;
+    data['if'] = `${blockStart} if(isset($_SERVER["HTTP_USER_AGENT"]) && strpos($_SERVER["HTTP_USER_AGENT"], "MSIE ") === false && !isset($_COOKIE["${nlsCookie}"])) { ${blockEnd}`;
+    data['else'] = `${blockStart} } else { ${blockEnd}`;
+    data['end'] = `${blockStart} } ${blockEnd}`;
 
     return data;
   }
 
   getLsConfigCode(appConfig) {
-    let { ld, rd } = this.config.tpl;
+    let { blockStart, blockEnd } = this;
     
     let configStr = JSON.stringify(appConfig);
 
-    return `${ld} $stc_ls_config = json_decode(\'${configStr}\', true); ${rd}`;
+    return `${blockStart} $stc_ls_config = json_decode(\'${configStr}\', true); ${blockEnd}`;
   }
 
   getLsBaseCode() {
-    let { ld, rd } = this.config.tpl;
+    let { blockStart, blockEnd } = this;
+
     let name = 'stc_ls_base_flag';
 
     let data = {};
 
-    data['if'] = `${ld} if(!isset($${name})) { $${name} = true; ${rd}`;
-    data['end'] = `${ld} } ${rd}`;
+    data['if'] = `${blockStart} if(!isset($${name})) { $${name} = true; ${blockEnd}`;
+    data['end'] = `${blockStart} } ${blockEnd}`;
 
     return data;
   }
 
   getLsParseCookieCode() {
-    let { ld, rd } = this.config.tpl;
+    let { blockStart, blockEnd } = this;
+
     let lsCookie = this.options.lsCookie;
 
     let content = [
-      ld,
+      blockStart,
       `if(isset($_COOKIE["${lsCookie}"])) {`,
       `$stc_ls_cookie = $_COOKIE["${lsCookie}"];`,
       `} else {`,
@@ -53,22 +61,22 @@ export default class stcAdapter {
       `for($i = 0; $i < $stc_cookie_length;$i += 2) {`,
       `$stc_ls_cookies[$stc_ls_cookie[$i]] = $stc_ls_cookie[$i+1];`,
       `}`,
-      rd,
+      blockEnd,
     ];
 
     return content.join('');
   }
 
   getLsConditionCode(lsValue) {
-    let { ld, rd } = this.config.tpl;
+    let { blockStart, blockEnd } = this;
 
     let data = {};
 
-    data['if'] = `${ld} if(isset($stc_ls_config["${lsValue}"]) && isset($stc_ls_cookies[$stc_ls_config["${lsValue}"]["key"]]) && $stc_ls_config["${lsValue}"]["version"] === $stc_ls_cookies[$stc_ls_config["${lsValue}"]["key"]]) { ${rd}`;
-    data['else'] = `${ld} } else { ${rd}`;
-    data['end'] = `${ld} } ${rd}`;
-    data['key'] = `${ld} echo $stc_ls_config["${lsValue}"]["key"]; ${rd}`;
-    data['version'] = `${ld} echo $stc_ls_config["${lsValue}"]["version"]; ${rd}`;
+    data['if'] = `${blockStart} if(isset($stc_ls_config["${lsValue}"]) && isset($stc_ls_cookies[$stc_ls_config["${lsValue}"]["key"]]) && $stc_ls_config["${lsValue}"]["version"] === $stc_ls_cookies[$stc_ls_config["${lsValue}"]["key"]]) { ${blockEnd}`;
+    data['else'] = `${blockStart} } else { ${blockEnd}`;
+    data['end'] = `${blockStart} } ${blockEnd}`;
+    data['key'] = `${blockStart} echo $stc_ls_config["${lsValue}"]["key"]; ${blockEnd}`;
+    data['version'] = `${blockStart} echo $stc_ls_config["${lsValue}"]["version"]; ${blockEnd}`;
 
     return data;
   }
