@@ -3,8 +3,6 @@ export default class stcAdapter {
     this.blockStart = options.blockStart || config.tpl.ld[0];
     this.blockEnd = options.blockStart || config.tpl.rd[0];
 
-    console.log(this);
-
     this.options = options;
     this.config = config;
   }
@@ -50,8 +48,7 @@ export default class stcAdapter {
     let lsCookie = this.options.lsCookie;
 
     let content = [
-      blockStart,
-      `if(isset($_COOKIE["${lsCookie}"])) {`,
+      `${blockStart} if(isset($_COOKIE["${lsCookie}"])) {`,
       `$stc_ls_cookie = $_COOKIE["${lsCookie}"];`,
       `} else {`,
       `$stc_ls_cookie = "";`,
@@ -60,8 +57,7 @@ export default class stcAdapter {
       `$stc_ls_cookies = array(,`,
       `for($i = 0; $i < $stc_cookie_length;$i += 2) {`,
       `$stc_ls_cookies[$stc_ls_cookie[$i]] = $stc_ls_cookie[$i+1];`,
-      `}`,
-      blockEnd,
+      `} ${blockEnd}`,
     ];
 
     return content.join('');
